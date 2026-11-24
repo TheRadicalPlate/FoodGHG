@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "Indian Dietary Environmental Footprint Calculator"
+version: "1.0.0"
+date-released: "2026-11-24"
+license: MIT
+authors:
+  - family-names: Alphonso
+    given-names: Rachael
+  - family-names: Cheela
+    given-names: Venkata Ravi Sankar
+keywords:
+  - environmental footprint
+  - greenhouse gas emissions
+  - water footprint
+  - land use
+  - Indian diet
+  - life cycle assessment
+references:
+  - type: article
+    title: "Exploring environmental footprints and socio-demographic characteristics of Indian diets"
+    authors:
+      - family-names: Joshi
+        given-names: Nidhi
+      - family-names: Raghuvanshi
+        given-names: Rita Singh
+    journal: "Science of the Total Environment"
+    volume: 967
+    pages: "178781"
+    year: 2025
+    doi: "10.1016/j.scitotenv.2025.178781"
+  - type: article
+    title: "Greenhouse gas emissions and water footprints of typical dietary patterns in India"
+    authors:
+      - family-names: Green
+        given-names: Rosemary F.
+      - family-names: Joy
+        given-names: Edward J. M.
+      - family-names: Harris
+        given-names: Francesca
+    journal: "Science of the Total Environment"
+    volume: 643
+    pages: "1411-1418"
+    year: 2018
+    doi: "10.1016/j.scitotenv.2018.06.258"
