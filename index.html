@@ -32,11 +32,17 @@
     .container { max-width: 1220px; margin: 1.5rem auto; padding: 0 1rem; display: grid; gap: 1.25rem; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
     .card h2 { margin: 0 0 1rem 0; font-size: 1.05rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
-    .form-grid { display: grid; grid-template-columns: 2fr 1.4fr 1.1fr 1.1fr auto; gap: 0.75rem; align-items: end; }
+    .form-grid { display: grid; grid-template-columns: 2fr 1.6fr 1.1fr 1.1fr auto; gap: 0.75rem; align-items: end; }
     @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr; } }
-    label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 0.3rem; }
-    input, select { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.92rem; background: #fff; }
+    label { display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 0.3rem; }
+    .pill { display: inline-block; padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; background: #e2e8f0; color: #475569; }
+    .pill.detected { background: #1b4332; color: #ffffff; }
+    .pill.manual { background: #0369a1; color: #ffffff; }
+    .pill.unknown { background: #fef3c7; color: #92400e; }
+    input, select { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.92rem; background: #fff; transition: background-color 0.2s, border-color 0.2s; }
     input:focus, select:focus { outline: 2px solid var(--primary-light); border-color: var(--primary-light); }
+    select.auto-matched { background: #d8f3dc; border: 2px solid #2d6a4f; color: #1b4332; font-weight: 700; }
+    select.unmapped-warn { background: #fef3c7; border: 2px solid #d97706; color: #92400e; font-weight: 600; }
     button { background: var(--primary); color: #fff; border: none; padding: 0.65rem 1.1rem; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.88rem; }
     button:hover { background: var(--primary-light); }
     button.secondary { background: #e2e8f0; color: var(--text); }
@@ -79,32 +85,35 @@
       <h2>1. Add Food Intake (Grams)</h2>
       <form id="foodForm" class="form-grid">
         <div>
-          <label for="foodInput">Food Item (e.g., Apple, Turmeric, Basmati Rice, Paneer)</label>
+          <label for="foodInput"><span>Food Item (e.g., Apple, Turmeric, Basmati Rice, Paneer)</span></label>
           <input id="foodInput" list="foodSuggestions" placeholder="Type any food item..." required autocomplete="off" />
           <datalist id="foodSuggestions"></datalist>
         </div>
         <div>
-          <label for="categorySelect">Auto-Classified Category</label>
+          <label for="categorySelect">
+            <span>Auto-Classified Category</span>
+            <span id="catStatusPill" class="pill">Waiting</span>
+          </label>
           <select id="categorySelect">
-            <option value="AUTO">Auto-Detect from Food Name</option>
+            <option value="AUTO">-- Auto-Classified Category --</option>
           </select>
         </div>
         <div>
-          <label for="stateSelect">Weight State</label>
+          <label for="stateSelect"><span>Weight State</span></label>
           <select id="stateSelect">
             <option value="RAW">Raw Weight (g)</option>
             <option value="COOKED">Cooked / Ready-to-Eat (g)</option>
           </select>
         </div>
         <div>
-          <label for="gramsInput">Quantity (grams)</label>
+          <label for="gramsInput"><span>Quantity (grams)</span></label>
           <input id="gramsInput" type="number" step="0.1" min="0.1" placeholder="e.g., 150" required />
         </div>
         <div>
           <button type="submit">+ Add Food</button>
         </div>
       </form>
-      <div id="livePreview" class="note">Detected category: <strong>—</strong></div>
+      <div id="livePreview" class="note">Status: <strong>Type a food item above (such as Apple or Turmeric) to auto-classify its category.</strong></div>
     </div>
 
     <!-- 2. KPI Summary -->
@@ -224,154 +233,70 @@
         <ul style="margin:0.4rem 0 0 1.2rem;padding:0;">
           <li><strong>Joshi, N., &amp; Raghuvanshi, R. S. (2025).</strong> Exploring environmental footprints and socio-demographic characteristics of Indian diets. <em>Science of the Total Environment</em>, 967, 178781. <a href="https://doi.org/10.1016/j.scitotenv.2025.178781" target="_blank" rel="noopener">https://doi.org/10.1016/j.scitotenv.2025.178781</a></li>
           <li><strong>Green, R. F., Joy, E. J. M., Harris, F., et al. (2018).</strong> Greenhouse gas emissions and water footprints of typical dietary patterns in India. <em>Science of the Total Environment</em>, 643, 1411–1418. <a href="https://doi.org/10.1016/j.scitotenv.2018.06.258" target="_blank" rel="noopener">https://doi.org/10.1016/j.scitotenv.2018.06.258</a></li>
-          <li><strong>Water &amp; Cooking Yield Foundations:</strong> Mekonnen, M. M., &amp; Hoekstra, A. Y. (2010, 2012) (Water Footprint Network); Bognár, A. (2002) &amp; EuroFIR (2008) (weight yield factors for cooked foods).</li>
+          <li><strong>Mekonnen, M. M., &amp; Hoekstra, A. Y. (2010, 2012).</strong> Water Footprint Network crop and farm animal product datasets.</li>
+          <li><strong>Bognár, A. (2002) &amp; EuroFIR (2008).</strong> Weight yield conversion factors for cooked foods.</li>
         </ul>
       </div>
     </div>
   </div>
 
   <footer>
-    &copy; 2026 Rachael Alphonso &amp; Cheela Venkata Ravi Sankar • Released under the MIT License • Data derived from Joshi &amp; Raghuvanshi (2025) and Green et al. (2018).
+    &copy; 2026 Rachael Alphonso &amp; Cheela Venkata Ravi Sankar • Released under the MIT License (v1.0.3) • Data derived from Joshi &amp; Raghuvanshi (2025) and Green et al. (2018).
   </footer>
 
   <script>
-    // Exact 18-category intensity matrix per kg of raw food (GHG Calc app DATABASE.xlsx)
+    // Exact 18-category intensity matrix per kg of raw food (presentable underscore-free labels)
     const FACTORS = {
-      Dairy:             { ghg: 4.69,  green: 2.46,  blue: 0.36, land: 3.37,  yield: 1.00 },
-      Dairy_Fat:         { ghg: 12.53, green: 4.82,  blue: 0.71, land: 10.27, yield: 1.00 },
-      Eggs:              { ghg: 1.12,  green: 5.43,  blue: 0.71, land: 16.99, yield: 0.90 },
-      Fish:              { ghg: 1.17,  green: 0.67,  blue: 0.29, land: 0.00,  yield: 0.80 },
-      Fruits:            { ghg: 0.27,  green: 0.73,  blue: 0.27, land: 0.78,  yield: 1.00 },
-      Millets:           { ghg: 0.77,  green: 4.21,  blue: 0.08, land: 9.40,  yield: 2.50 },
-      Nuts_Oilseeds:     { ghg: 1.29,  green: 7.71,  blue: 1.49, land: 14.73, yield: 1.00 },
-      Oils_Plant:        { ghg: 1.04,  green: 10.31, blue: 1.19, land: 35.87, yield: 1.00 },
-      Other_Cereals:     { ghg: 0.77,  green: 2.27,  blue: 0.10, land: 4.18,  yield: 2.40 },
-      Poultry:           { ghg: 1.43,  green: 6.73,  blue: 0.87, land: 30.63, yield: 0.75 },
-      Processed_Other:   { ghg: 3.14,  green: 3.17,  blue: 0.46, land: 12.80, yield: 1.00 },
-      Pulses:            { ghg: 1.44,  green: 5.01,  blue: 0.22, land: 14.62, yield: 2.80 },
-      Red_Meat:          { ghg: 85.57, green: 5.80,  blue: 0.49, land: 52.91, yield: 0.75 },
-      Rice:              { ghg: 1.61,  green: 2.05,  blue: 0.66, land: 3.82,  yield: 2.50 },
-      Spices_Condiments: { ghg: 1.25,  green: 12.01, blue: 2.61, land: 5.59,  yield: 1.00 },
-      Sugars:            { ghg: 0.50,  green: 0.55,  blue: 0.62, land: 1.18,  yield: 1.00 },
-      Vegetables:        { ghg: 0.36,  green: 0.34,  blue: 0.09, land: 0.81,  yield: 0.85 },
-      Wheat:             { ghg: 0.54,  green: 0.63,  blue: 1.16, land: 2.63,  yield: 1.40 }
+      "Dairy":               { ghg: 4.69,  green: 2.46,  blue: 0.36, land: 3.37,  yield: 1.00 },
+      "Dairy Fat":           { ghg: 12.53, green: 4.82,  blue: 0.71, land: 10.27, yield: 1.00 },
+      "Eggs":                { ghg: 1.12,  green: 5.43,  blue: 0.71, land: 16.99, yield: 0.90 },
+      "Fish":                { ghg: 1.17,  green: 0.67,  blue: 0.29, land: 0.00,  yield: 0.80 },
+      "Fruits":              { ghg: 0.27,  green: 0.73,  blue: 0.27, land: 0.78,  yield: 1.00 },
+      "Millets":             { ghg: 0.77,  green: 4.21,  blue: 0.08, land: 9.40,  yield: 2.50 },
+      "Nuts & Oilseeds":     { ghg: 1.29,  green: 7.71,  blue: 1.49, land: 14.73, yield: 1.00 },
+      "Plant Oils":          { ghg: 1.04,  green: 10.31, blue: 1.19, land: 35.87, yield: 1.00 },
+      "Other Cereals":       { ghg: 0.77,  green: 2.27,  blue: 0.10, land: 4.18,  yield: 2.40 },
+      "Poultry":             { ghg: 1.43,  green: 6.73,  blue: 0.87, land: 30.63, yield: 0.75 },
+      "Processed & Other":   { ghg: 3.14,  green: 3.17,  blue: 0.46, land: 12.80, yield: 1.00 },
+      "Pulses":              { ghg: 1.44,  green: 5.01,  blue: 0.22, land: 14.62, yield: 2.80 },
+      "Red Meat":            { ghg: 85.57, green: 5.80,  blue: 0.49, land: 52.91, yield: 0.75 },
+      "Rice":                { ghg: 1.61,  green: 2.05,  blue: 0.66, land: 3.82,  yield: 2.50 },
+      "Spices & Condiments": { ghg: 1.25,  green: 12.01, blue: 2.61, land: 5.59,  yield: 1.00 },
+      "Sugars":              { ghg: 0.50,  green: 0.55,  blue: 0.62, land: 1.18,  yield: 1.00 },
+      "Vegetables":          { ghg: 0.36,  green: 0.34,  blue: 0.09, land: 0.81,  yield: 0.85 },
+      "Wheat":               { ghg: 0.54,  green: 0.63,  blue: 1.16, land: 2.63,  yield: 1.40 }
     };
 
-    // Keyword dictionary mapping Indian & global foods to the 18 categories
-    const FOOD_DICTIONARY = {
-      // Dairy
-      "milk": "Dairy", "cow milk": "Dairy", "buffalo milk": "Dairy", "toned milk": "Dairy",
-      "curd": "Dairy", "dahi": "Dairy", "yogurt": "Dairy", "yoghurt": "Dairy",
-      "paneer": "Dairy", "cottage cheese": "Dairy", "buttermilk": "Dairy", "chaas": "Dairy",
-      "lassi": "Dairy", "cheese": "Dairy", "khoya": "Dairy", "mawa": "Dairy",
-      // Dairy_Fat
-      "ghee": "Dairy_Fat", "desi ghee": "Dairy_Fat", "butter": "Dairy_Fat",
-      "white butter": "Dairy_Fat", "makhan": "Dairy_Fat", "cream": "Dairy_Fat", "malai": "Dairy_Fat",
-      // Eggs
-      "egg": "Eggs", "eggs": "Eggs", "boiled egg": "Eggs", "omelette": "Eggs", "egg white": "Eggs",
-      // Fish
-      "fish": "Fish", "rohu": "Fish", "katla": "Fish", "hilsa": "Fish", "pomfret": "Fish",
-      "mackerel": "Fish", "surmai": "Fish", "sardine": "Fish", "tuna": "Fish", "salmon": "Fish",
-      "prawns": "Fish", "shrimp": "Fish", "crab": "Fish", "seafood": "Fish",
-      // Fruits
-      "apple": "Fruits", "banana": "Fruits", "mango": "Fruits", "orange": "Fruits",
-      "papaya": "Fruits", "guava": "Fruits", "grapes": "Fruits", "watermelon": "Fruits",
-      "muskmelon": "Fruits", "melon": "Fruits", "pomegranate": "Fruits", "anar": "Fruits",
-      "pineapple": "Fruits", "chikoo": "Fruits", "sapota": "Fruits", "pear": "Fruits",
-      "plum": "Fruits", "peach": "Fruits", "lychee": "Fruits", "litchi": "Fruits",
-      "custard apple": "Fruits", "sitaphal": "Fruits", "jackfruit": "Fruits", "fig": "Fruits",
-      "anjeer": "Fruits", "dates": "Fruits", "khajoor": "Fruits", "kiwi": "Fruits",
-      "strawberry": "Fruits", "lemon": "Fruits", "lime": "Fruits", "mosambi": "Fruits", "avocado": "Fruits",
-      // Millets
-      "millet": "Millets", "millets": "Millets", "ragi": "Millets", "finger millet": "Millets",
-      "nachni": "Millets", "bajra": "Millets", "pearl millet": "Millets", "jowar": "Millets",
-      "sorghum": "Millets", "foxtail millet": "Millets", "kangni": "Millets",
-      "little millet": "Millets", "kutki": "Millets", "kodo millet": "Millets",
-      "barnyard millet": "Millets", "sanwa": "Millets", "amaranth": "Millets", "rajgira": "Millets",
-      // Nuts_Oilseeds
-      "almond": "Nuts_Oilseeds", "almonds": "Nuts_Oilseeds", "badam": "Nuts_Oilseeds",
-      "cashew": "Nuts_Oilseeds", "cashews": "Nuts_Oilseeds", "kaju": "Nuts_Oilseeds",
-      "peanut": "Nuts_Oilseeds", "peanuts": "Nuts_Oilseeds", "groundnut": "Nuts_Oilseeds",
-      "walnut": "Nuts_Oilseeds", "akhrot": "Nuts_Oilseeds", "pistachio": "Nuts_Oilseeds",
-      "pista": "Nuts_Oilseeds", "raisins": "Nuts_Oilseeds", "kishmish": "Nuts_Oilseeds",
-      "sesame": "Nuts_Oilseeds", "til": "Nuts_Oilseeds", "flaxseed": "Nuts_Oilseeds",
-      "chia seeds": "Nuts_Oilseeds", "pumpkin seeds": "Nuts_Oilseeds", "sunflower seeds": "Nuts_Oilseeds",
-      "coconut": "Nuts_Oilseeds", "fresh coconut": "Nuts_Oilseeds",
-      // Oils_Plant
-      "vegetable oil": "Oils_Plant", "cooking oil": "Oils_Plant", "oil": "Oils_Plant",
-      "mustard oil": "Oils_Plant", "sunflower oil": "Oils_Plant", "soybean oil": "Oils_Plant",
-      "groundnut oil": "Oils_Plant", "peanut oil": "Oils_Plant", "coconut oil": "Oils_Plant",
-      "sesame oil": "Oils_Plant", "gingelly oil": "Oils_Plant", "rice bran oil": "Oils_Plant",
-      "olive oil": "Oils_Plant", "palm oil": "Oils_Plant", "canola oil": "Oils_Plant",
-      // Other_Cereals
-      "oats": "Other_Cereals", "oatmeal": "Other_Cereals", "maize": "Other_Cereals",
-      "corn": "Other_Cereals", "sweet corn": "Other_Cereals", "makki": "Other_Cereals",
-      "barley": "Other_Cereals", "jau": "Other_Cereals", "quinoa": "Other_Cereals",
-      // Poultry
-      "chicken": "Poultry", "chicken breast": "Poultry", "chicken curry": "Poultry",
-      "poultry": "Poultry", "duck": "Poultry", "turkey": "Poultry",
-      // Processed_Other
-      "biscuit": "Processed_Other", "biscuits": "Processed_Other", "bread": "Processed_Other",
-      "cake": "Processed_Other", "rusk": "Processed_Other", "namkeen": "Processed_Other",
-      "chips": "Processed_Other", "samosa": "Processed_Other", "pakora": "Processed_Other",
-      "noodles": "Processed_Other", "pasta": "Processed_Other", "chocolate": "Processed_Other",
-      "ice cream": "Processed_Other", "sweets": "Processed_Other", "mithai": "Processed_Other",
-      "jam": "Processed_Other", "ketchup": "Processed_Other", "pickle": "Processed_Other",
-      "papad": "Processed_Other", "soft drink": "Processed_Other", "tea": "Processed_Other",
-      "coffee": "Processed_Other", "tofu": "Processed_Other", "soya chunks": "Processed_Other",
-      // Pulses
-      "dal": "Pulses", "lentils": "Pulses", "toor dal": "Pulses", "arhar dal": "Pulses",
-      "red gram": "Pulses", "moong dal": "Pulses", "green gram": "Pulses", "moong": "Pulses",
-      "masoor dal": "Pulses", "urad dal": "Pulses", "black gram": "Pulses", "chana dal": "Pulses",
-      "chickpea": "Pulses", "chickpeas": "Pulses", "kabuli chana": "Pulses", "kala chana": "Pulses",
-      "rajma": "Pulses", "kidney beans": "Pulses", "lobia": "Pulses", "cowpea": "Pulses",
-      "horse gram": "Pulses", "kulthi": "Pulses", "soybean": "Pulses", "besan": "Pulses",
-      // Red_Meat
-      "mutton": "Red_Meat", "goat": "Red_Meat", "goat meat": "Red_Meat", "lamb": "Red_Meat",
-      "beef": "Red_Meat", "buffalo meat": "Red_Meat", "pork": "Red_Meat", "keema": "Red_Meat",
-      // Rice
-      "rice": "Rice", "white rice": "Rice", "brown rice": "Rice", "basmati rice": "Rice",
-      "parboiled rice": "Rice", "idli rice": "Rice", "poha": "Rice", "murmura": "Rice", "rice flour": "Rice",
-      // Spices_Condiments
-      "turmeric": "Spices_Condiments", "turmeric powder": "Spices_Condiments", "haldi": "Spices_Condiments",
-      "cumin": "Spices_Condiments", "jeera": "Spices_Condiments", "coriander powder": "Spices_Condiments",
-      "coriander seeds": "Spices_Condiments", "dhania": "Spices_Condiments",
-      "chili powder": "Spices_Condiments", "red chilli": "Spices_Condiments",
-      "black pepper": "Spices_Condiments", "pepper": "Spices_Condiments",
-      "cardamom": "Spices_Condiments", "elaichi": "Spices_Condiments",
-      "cinnamon": "Spices_Condiments", "dalchini": "Spices_Condiments",
-      "clove": "Spices_Condiments", "cloves": "Spices_Condiments",
-      "mustard seeds": "Spices_Condiments", "fenugreek": "Spices_Condiments",
-      "asafoetida": "Spices_Condiments", "hing": "Spices_Condiments",
-      "garam masala": "Spices_Condiments", "ginger": "Spices_Condiments",
-      "garlic": "Spices_Condiments", "tamarind": "Spices_Condiments", "vinegar": "Spices_Condiments",
-      // Sugars
-      "sugar": "Sugars", "white sugar": "Sugars", "brown sugar": "Sugars",
-      "jaggery": "Sugars", "gur": "Sugars", "honey": "Sugars", "mishri": "Sugars",
-      // Vegetables
-      "potato": "Vegetables", "aloo": "Vegetables", "sweet potato": "Vegetables",
-      "onion": "Vegetables", "pyaz": "Vegetables", "tomato": "Vegetables",
-      "spinach": "Vegetables", "palak": "Vegetables", "methi": "Vegetables",
-      "cabbage": "Vegetables", "cauliflower": "Vegetables", "broccoli": "Vegetables",
-      "brinjal": "Vegetables", "eggplant": "Vegetables", "baingan": "Vegetables",
-      "okra": "Vegetables", "ladyfinger": "Vegetables", "bhindi": "Vegetables",
-      "bottle gourd": "Vegetables", "lauki": "Vegetables", "bitter gourd": "Vegetables", "karela": "Vegetables",
-      "ridge gourd": "Vegetables", "pumpkin": "Vegetables", "cucumber": "Vegetables",
-      "carrot": "Vegetables", "gajar": "Vegetables", "radish": "Vegetables",
-      "beetroot": "Vegetables", "capsicum": "Vegetables", "bell pepper": "Vegetables",
-      "green beans": "Vegetables", "french beans": "Vegetables", "drumstick": "Vegetables",
-      "mushroom": "Vegetables", "green peas": "Vegetables", "taro": "Vegetables", "arbi": "Vegetables",
-      // Wheat
-      "wheat": "Wheat", "wheat flour": "Wheat", "atta": "Wheat", "whole wheat": "Wheat",
-      "roti": "Wheat", "chapati": "Wheat", "phulka": "Wheat", "paratha": "Wheat",
-      "puri": "Wheat", "naan": "Wheat", "maida": "Wheat", "semolina": "Wheat",
-      "suji": "Wheat", "rava": "Wheat", "dalia": "Wheat", "vermicelli": "Wheat"
+    const LEGACY_CATEGORY_MAP = {
+      "Dairy_Fat": "Dairy Fat",
+      "Nuts_Oilseeds": "Nuts & Oilseeds",
+      "Oils_Plant": "Plant Oils",
+      "Other_Cereals": "Other Cereals",
+      "Processed_Other": "Processed & Other",
+      "Red_Meat": "Red Meat",
+      "Spices_Condiments": "Spices & Condiments"
     };
+
+    const FOOD_DICTIONARY = {"milk": "Dairy", "cow milk": "Dairy", "buffalo milk": "Dairy", "toned milk": "Dairy", "skimmed milk": "Dairy", "full cream milk": "Dairy", "curd": "Dairy", "dahi": "Dairy", "yogurt": "Dairy", "yoghurt": "Dairy", "greek yogurt": "Dairy", "paneer": "Dairy", "cottage cheese": "Dairy", "buttermilk": "Dairy", "chaas": "Dairy", "lassi": "Dairy", "cheese": "Dairy", "khoya": "Dairy", "mawa": "Dairy", "chhena": "Dairy", "condensed milk": "Dairy", "ghee": "Dairy Fat", "desi ghee": "Dairy Fat", "butter": "Dairy Fat", "white butter": "Dairy Fat", "makhan": "Dairy Fat", "cream": "Dairy Fat", "malai": "Dairy Fat", "egg": "Eggs", "boiled egg": "Eggs", "fried egg": "Eggs", "scrambled egg": "Eggs", "omelette": "Eggs", "egg white": "Eggs", "egg yolk": "Eggs", "fish": "Fish", "rohu": "Fish", "katla": "Fish", "catla": "Fish", "hilsa": "Fish", "pomfret": "Fish", "mackerel": "Fish", "bangda": "Fish", "surmai": "Fish", "kingfish": "Fish", "sardine": "Fish", "tuna": "Fish", "salmon": "Fish", "prawn": "Fish", "shrimp": "Fish", "crab": "Fish", "seafood": "Fish", "apple": "Fruits", "green apple": "Fruits", "red apple": "Fruits", "banana": "Fruits", "mango": "Fruits", "orange": "Fruits", "papaya": "Fruits", "guava": "Fruits", "grape": "Fruits", "watermelon": "Fruits", "muskmelon": "Fruits", "melon": "Fruits", "pomegranate": "Fruits", "anar": "Fruits", "pineapple": "Fruits", "sapota": "Fruits", "chikoo": "Fruits", "pear": "Fruits", "plum": "Fruits", "peach": "Fruits", "lychee": "Fruits", "litchi": "Fruits", "custard apple": "Fruits", "sitaphal": "Fruits", "jackfruit": "Fruits", "fig": "Fruits", "anjeer": "Fruits", "date": "Fruits", "khajoor": "Fruits", "kiwi": "Fruits", "strawberry": "Fruits", "berry": "Fruits", "lemon": "Fruits", "lime": "Fruits", "sweet lime": "Fruits", "mosambi": "Fruits", "avocado": "Fruits", "coconut water": "Fruits", "millet": "Millets", "ragi": "Millets", "finger millet": "Millets", "nachni": "Millets", "bajra": "Millets", "pearl millet": "Millets", "jowar": "Millets", "sorghum": "Millets", "foxtail millet": "Millets", "kangni": "Millets", "little millet": "Millets", "kutki": "Millets", "kodo millet": "Millets", "barnyard millet": "Millets", "sanwa": "Millets", "proso millet": "Millets", "amaranth": "Millets", "rajgira": "Millets", "buckwheat": "Millets", "kuttu": "Millets", "almond": "Nuts & Oilseeds", "badam": "Nuts & Oilseeds", "cashew": "Nuts & Oilseeds", "kaju": "Nuts & Oilseeds", "peanut": "Nuts & Oilseeds", "groundnut": "Nuts & Oilseeds", "moongphali": "Nuts & Oilseeds", "walnut": "Nuts & Oilseeds", "akhrot": "Nuts & Oilseeds", "pistachio": "Nuts & Oilseeds", "pista": "Nuts & Oilseeds", "raisin": "Nuts & Oilseeds", "kishmish": "Nuts & Oilseeds", "sesame": "Nuts & Oilseeds", "til": "Nuts & Oilseeds", "flaxseed": "Nuts & Oilseeds", "alsi": "Nuts & Oilseeds", "chia seed": "Nuts & Oilseeds", "pumpkin seed": "Nuts & Oilseeds", "sunflower seed": "Nuts & Oilseeds", "melon seed": "Nuts & Oilseeds", "coconut": "Nuts & Oilseeds", "fresh coconut": "Nuts & Oilseeds", "copra": "Nuts & Oilseeds", "vegetable oil": "Plant Oils", "cooking oil": "Plant Oils", "oil": "Plant Oils", "mustard oil": "Plant Oils", "sarson oil": "Plant Oils", "sunflower oil": "Plant Oils", "soybean oil": "Plant Oils", "groundnut oil": "Plant Oils", "peanut oil": "Plant Oils", "coconut oil": "Plant Oils", "sesame oil": "Plant Oils", "gingelly oil": "Plant Oils", "rice bran oil": "Plant Oils", "olive oil": "Plant Oils", "palm oil": "Plant Oils", "canola oil": "Plant Oils", "corn oil": "Plant Oils", "safflower oil": "Plant Oils", "vanaspati": "Plant Oils", "oat": "Other Cereals", "oatmeal": "Other Cereals", "maize": "Other Cereals", "corn": "Other Cereals", "sweet corn": "Other Cereals", "makki": "Other Cereals", "barley": "Other Cereals", "jau": "Other Cereals", "quinoa": "Other Cereals", "rye": "Other Cereals", "chicken": "Poultry", "chicken breast": "Poultry", "chicken curry": "Poultry", "grilled chicken": "Poultry", "poultry": "Poultry", "duck": "Poultry", "turkey": "Poultry", "quail": "Poultry", "biscuit": "Processed & Other", "cookie": "Processed & Other", "bread": "Processed & Other", "white bread": "Processed & Other", "brown bread": "Processed & Other", "bun": "Processed & Other", "cake": "Processed & Other", "pastry": "Processed & Other", "rusk": "Processed & Other", "namkeen": "Processed & Other", "chip": "Processed & Other", "bhujia": "Processed & Other", "samosa": "Processed & Other", "pakora": "Processed & Other", "noodle": "Processed & Other", "pasta": "Processed & Other", "maggi": "Processed & Other", "chocolate": "Processed & Other", "ice cream": "Processed & Other", "sweet": "Processed & Other", "mithai": "Processed & Other", "jam": "Processed & Other", "ketchup": "Processed & Other", "sauce": "Processed & Other", "pickle": "Processed & Other", "achar": "Processed & Other", "papad": "Processed & Other", "soft drink": "Processed & Other", "soda": "Processed & Other", "cola": "Processed & Other", "fruit juice": "Processed & Other", "packaged juice": "Processed & Other", "tea": "Processed & Other", "chai": "Processed & Other", "green tea": "Processed & Other", "black tea": "Processed & Other", "milk tea": "Processed & Other", "coffee": "Processed & Other", "filter coffee": "Processed & Other", "beer": "Processed & Other", "wine": "Processed & Other", "alcohol": "Processed & Other", "tofu": "Processed & Other", "soya chunk": "Processed & Other", "dal": "Pulses", "lentil": "Pulses", "toor dal": "Pulses", "toor": "Pulses", "arhar dal": "Pulses", "arhar": "Pulses", "pigeon pea": "Pulses", "red gram": "Pulses", "moong dal": "Pulses", "green gram": "Pulses", "moong": "Pulses", "masoor dal": "Pulses", "masoor": "Pulses", "red lentil": "Pulses", "urad dal": "Pulses", "urad": "Pulses", "black gram": "Pulses", "chana dal": "Pulses", "chana": "Pulses", "bengal gram": "Pulses", "chickpea": "Pulses", "kabuli chana": "Pulses", "kala chana": "Pulses", "rajma": "Pulses", "kidney bean": "Pulses", "lobia": "Pulses", "black eyed pea": "Pulses", "cowpea": "Pulses", "horse gram": "Pulses", "kulthi": "Pulses", "moth bean": "Pulses", "matki": "Pulses", "dry pea": "Pulses", "soybean": "Pulses", "besan": "Pulses", "gram flour": "Pulses", "mutton": "Red Meat", "mutton curry": "Red Meat", "goat": "Red Meat", "goat meat": "Red Meat", "lamb": "Red Meat", "beef": "Red Meat", "buffalo meat": "Red Meat", "carabeef": "Red Meat", "pork": "Red Meat", "red meat": "Red Meat", "keema": "Red Meat", "rice": "Rice", "white rice": "Rice", "brown rice": "Rice", "basmati rice": "Rice", "cooked rice": "Rice", "steamed rice": "Rice", "boiled rice": "Rice", "jeera rice": "Rice", "parboiled rice": "Rice", "idli rice": "Rice", "poha": "Rice", "flattened rice": "Rice", "murmura": "Rice", "puffed rice": "Rice", "rice flour": "Rice", "turmeric": "Spices & Condiments", "turmeric powder": "Spices & Condiments", "raw turmeric": "Spices & Condiments", "fresh turmeric": "Spices & Condiments", "haldi": "Spices & Condiments", "haldi powder": "Spices & Condiments", "cumin": "Spices & Condiments", "jeera": "Spices & Condiments", "coriander powder": "Spices & Condiments", "coriander seed": "Spices & Condiments", "dhania": "Spices & Condiments", "chili powder": "Spices & Condiments", "red chilli": "Spices & Condiments", "mirchi": "Spices & Condiments", "black pepper": "Spices & Condiments", "pepper": "Spices & Condiments", "kali mirch": "Spices & Condiments", "cardamom": "Spices & Condiments", "elaichi": "Spices & Condiments", "cinnamon": "Spices & Condiments", "dalchini": "Spices & Condiments", "clove": "Spices & Condiments", "laung": "Spices & Condiments", "mustard seed": "Spices & Condiments", "rai": "Spices & Condiments", "fenugreek": "Spices & Condiments", "methi seed": "Spices & Condiments", "asafoetida": "Spices & Condiments", "hing": "Spices & Condiments", "garam masala": "Spices & Condiments", "curry powder": "Spices & Condiments", "ginger": "Spices & Condiments", "adrak": "Spices & Condiments", "garlic": "Spices & Condiments", "lehsun": "Spices & Condiments", "tamarind": "Spices & Condiments", "imli": "Spices & Condiments", "vinegar": "Spices & Condiments", "spice": "Spices & Condiments", "sugar": "Sugars", "white sugar": "Sugars", "brown sugar": "Sugars", "jaggery": "Sugars", "gur": "Sugars", "honey": "Sugars", "cane sugar": "Sugars", "mishri": "Sugars", "molasses": "Sugars", "potato": "Vegetables", "aloo": "Vegetables", "sweet potato": "Vegetables", "shakarkandi": "Vegetables", "onion": "Vegetables", "pyaz": "Vegetables", "tomato": "Vegetables", "tamatar": "Vegetables", "spinach": "Vegetables", "palak": "Vegetables", "fenugreek leaves": "Vegetables", "methi": "Vegetables", "amaranth leaves": "Vegetables", "chaulai": "Vegetables", "mustard greens": "Vegetables", "sarson saag": "Vegetables", "coriander leaves": "Vegetables", "mint": "Vegetables", "pudina": "Vegetables", "curry leaves": "Vegetables", "cabbage": "Vegetables", "patta gobhi": "Vegetables", "cauliflower": "Vegetables", "phool gobhi": "Vegetables", "broccoli": "Vegetables", "brinjal": "Vegetables", "eggplant": "Vegetables", "baingan": "Vegetables", "okra": "Vegetables", "ladyfinger": "Vegetables", "bhindi": "Vegetables", "bottle gourd": "Vegetables", "lauki": "Vegetables", "bitter gourd": "Vegetables", "karela": "Vegetables", "ridge gourd": "Vegetables", "turai": "Vegetables", "snake gourd": "Vegetables", "pumpkin": "Vegetables", "kaddu": "Vegetables", "cucumber": "Vegetables", "kheera": "Vegetables", "carrot": "Vegetables", "gajar": "Vegetables", "radish": "Vegetables", "mooli": "Vegetables", "beetroot": "Vegetables", "turnip": "Vegetables", "shalgam": "Vegetables", "capsicum": "Vegetables", "bell pepper": "Vegetables", "shimla mirch": "Vegetables", "green chilli": "Vegetables", "french bean": "Vegetables", "green bean": "Vegetables", "cluster bean": "Vegetables", "gawar": "Vegetables", "drumstick": "Vegetables", "moringa": "Vegetables", "mushroom": "Vegetables", "green pea": "Vegetables", "pea": "Vegetables", "matar": "Vegetables", "yam": "Vegetables", "jimikand": "Vegetables", "taro": "Vegetables", "arbi": "Vegetables", "vegetable": "Vegetables", "wheat": "Wheat", "wheat flour": "Wheat", "atta": "Wheat", "whole wheat": "Wheat", "roti": "Wheat", "chapati": "Wheat", "chapathi": "Wheat", "phulka": "Wheat", "paratha": "Wheat", "puri": "Wheat", "naan": "Wheat", "maida": "Wheat", "refined flour": "Wheat", "semolina": "Wheat", "suji": "Wheat", "rava": "Wheat", "dalia": "Wheat", "broken wheat": "Wheat", "vermicelli": "Wheat", "seviyan": "Wheat"};
 
     const NIN_BENCHMARK = { ghg: 2.30, green: 2.35, blue: 0.44, land: 4.96 };
-    let entries = JSON.parse(localStorage.getItem("indian_diet_fp_entries_v2") || "[]");
 
-    // Dynamic citation setup for Alphonso & Cheela (MIT Licensed)
+    function safeLoadEntries() {
+      try {
+        const raw = JSON.parse(window.localStorage.getItem("indian_diet_fp_entries_v2") || "[]");
+        if (!Array.isArray(raw)) return [];
+        return raw.map(item => {
+          const mappedCat = LEGACY_CATEGORY_MAP[item.category] || item.category;
+          return Object.assign({}, item, { category: FACTORS[mappedCat] ? mappedCat : "Processed & Other" });
+        });
+      } catch (err) {
+        return [];
+      }
+    }
+
+    let entries = safeLoadEntries();
+    let userManuallySelectedCategory = false;
+
     const appUrl = window.location.protocol.startsWith("http")
       ? window.location.href.split("#")[0].split("?")[0]
       : "https://github.com/[username]/[repository]";
@@ -383,7 +308,7 @@
   year         = {2026},
   license      = {MIT},
   url          = {${appUrl}},
-  note         = {Implements dietary environmental intensity coefficients from Joshi \\& Raghuvanshi (2025) and Green et al. (2018)}
+  note         = {Implements dietary environmental intensity coefficients from Joshi \& Raghuvanshi (2025) and Green et al. (2018)}
 }`;
 
     document.getElementById("userCitationText").textContent = APA_CITATION;
@@ -398,8 +323,12 @@
       });
     }
 
-    // Populate dropdowns and autocomplete
+    const foodInput = document.getElementById("foodInput");
     const catSelect = document.getElementById("categorySelect");
+    const catStatusPill = document.getElementById("catStatusPill");
+    const stateSelect = document.getElementById("stateSelect");
+
+    // Populate clean category options
     Object.keys(FACTORS).forEach(cat => {
       const opt = document.createElement("option");
       opt.value = cat;
@@ -407,6 +336,7 @@
       catSelect.appendChild(opt);
     });
 
+    // Populate autocomplete suggestions
     const datalist = document.getElementById("foodSuggestions");
     Object.keys(FOOD_DICTIONARY).sort().forEach(food => {
       const opt = document.createElement("option");
@@ -414,14 +344,34 @@
       datalist.appendChild(opt);
     });
 
+    function singularizeWord(w) {
+      if (w.endsWith("ies") && w.length > 4) return w.slice(0, -3) + "y";
+      if (w.endsWith("oes") && w.length > 4) return w.slice(0, -2);
+      if (w.endsWith("es") && w.length > 4) return w.slice(0, -2);
+      if (w.endsWith("s") && !w.endsWith("ss") && w.length > 3) return w.slice(0, -1);
+      return w;
+    }
+
+    const SORTED_DICT_KEYS = Object.keys(FOOD_DICTIONARY).sort((a, b) => b.length - a.length);
+
     function classifyFood(rawName) {
-      const clean = rawName.trim().toLowerCase();
+      const clean = rawName.trim().toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
       if (!clean) return null;
+
+      // 1. Direct exact match
       if (FOOD_DICTIONARY[clean]) return FOOD_DICTIONARY[clean];
-      const sortedKeys = Object.keys(FOOD_DICTIONARY).sort((a, b) => b.length - a.length);
-      for (const key of sortedKeys) {
-        const regex = new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
-        if (regex.test(clean)) return FOOD_DICTIONARY[key];
+
+      // 2. Singularized exact match (e.g., "apples" -> "apple", "potatoes" -> "potato")
+      const singularPhrase = clean.split(" ").map(singularizeWord).join(" ");
+      if (FOOD_DICTIONARY[singularPhrase]) return FOOD_DICTIONARY[singularPhrase];
+
+      // 3. Whole-word / plural keyword match inside multi-word dish names
+      for (const key of SORTED_DICT_KEYS) {
+        const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const regex = new RegExp(`\\b${escaped}(?:es|s)?\\b`, "i");
+        if (regex.test(clean) || regex.test(singularPhrase)) {
+          return FOOD_DICTIONARY[key];
+        }
       }
       return null;
     }
@@ -430,40 +380,77 @@
       return str.replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
     }
 
-    function updatePreview() {
-      const nameVal = document.getElementById("foodInput").value;
-      const manualCat = document.getElementById("categorySelect").value;
-      const state = document.getElementById("stateSelect").value;
-      const detected = manualCat === "AUTO" ? classifyFood(nameVal) : manualCat;
+    function syncCategoryFromInput() {
+      const nameVal = foodInput.value;
+      const state = stateSelect.value;
       const preview = document.getElementById("livePreview");
 
-      if (!nameVal.trim() && manualCat === "AUTO") {
-        preview.innerHTML = "Detected category: <strong>—</strong>";
-      } else if (detected) {
-        const yf = FACTORS[detected].yield;
-        const yieldInfo = state === "COOKED"
-          ? ` • Cooked-to-raw yield factor: <strong>÷ ${yf.toFixed(2)}</strong>`
-          : " • Direct raw weight";
-        preview.innerHTML = `Detected category: <strong>${detected}</strong>${yieldInfo}`;
+      if (!nameVal.trim()) {
+        userManuallySelectedCategory = false;
+        catSelect.value = "AUTO";
+        catSelect.className = "";
+        catStatusPill.textContent = "Waiting";
+        catStatusPill.className = "pill";
+        preview.innerHTML = "Status: <strong>Type a food item above (such as Apple or Turmeric) to auto-classify its category.</strong>";
+        return;
+      }
+
+      if (!userManuallySelectedCategory) {
+        const detected = classifyFood(nameVal);
+        if (detected && FACTORS[detected]) {
+          catSelect.value = detected;
+          catSelect.className = "auto-matched";
+          catStatusPill.textContent = "Auto-Detected";
+          catStatusPill.className = "pill detected";
+          const f = FACTORS[detected];
+          const yieldInfo = state === "COOKED" ? ` • Cooked ÷ ${f.yield.toFixed(2)}` : "";
+          preview.innerHTML = `Auto-classified as <strong>${detected}</strong> (GHG: ${f.ghg.toFixed(2)} kg/kg • Green WF: ${f.green.toFixed(2)} m³/kg • Blue WF: ${f.blue.toFixed(2)} m³/kg • Land: ${f.land.toFixed(2)} m²/kg${yieldInfo})`;
+        } else {
+          catSelect.value = "AUTO";
+          catSelect.className = "unmapped-warn";
+          catStatusPill.textContent = "Select Manually";
+          catStatusPill.className = "pill unknown";
+          preview.innerHTML = `Status: <strong style="color:#b45309;">"${escapeHtml(nameVal.trim())}" is not in the built-in dictionary — choose one of the 18 categories from the dropdown.</strong>`;
+        }
       } else {
-        preview.innerHTML = `Detected category: <strong style="color:#b45309;">Unmapped — please select a category manually</strong>`;
+        const chosen = catSelect.value;
+        if (chosen !== "AUTO" && FACTORS[chosen]) {
+          catSelect.className = "auto-matched";
+          catStatusPill.textContent = "Manual Override";
+          catStatusPill.className = "pill manual";
+          const f = FACTORS[chosen];
+          const yieldInfo = state === "COOKED" ? ` • Cooked ÷ ${f.yield.toFixed(2)}` : "";
+          preview.innerHTML = `Selected category: <strong>${chosen}</strong> (GHG: ${f.ghg.toFixed(2)} kg/kg • Green WF: ${f.green.toFixed(2)} m³/kg • Blue WF: ${f.blue.toFixed(2)} m³/kg • Land: ${f.land.toFixed(2)} m²/kg${yieldInfo})`;
+        }
       }
     }
 
-    document.getElementById("foodInput").addEventListener("input", updatePreview);
-    document.getElementById("categorySelect").addEventListener("change", updatePreview);
-    document.getElementById("stateSelect").addEventListener("change", updatePreview);
+    ["input", "keyup", "change", "paste", "blur", "compositionend"].forEach(evtName => {
+      foodInput.addEventListener(evtName, () => {
+        userManuallySelectedCategory = false;
+        syncCategoryFromInput();
+      });
+    });
+
+    catSelect.addEventListener("change", () => {
+      userManuallySelectedCategory = catSelect.value !== "AUTO";
+      syncCategoryFromInput();
+    });
+
+    stateSelect.addEventListener("change", syncCategoryFromInput);
 
     document.getElementById("foodForm").addEventListener("submit", e => {
       e.preventDefault();
-      const name = document.getElementById("foodInput").value.trim();
+      const name = foodInput.value.trim();
       const enteredGrams = parseFloat(document.getElementById("gramsInput").value);
-      const manualCat = document.getElementById("categorySelect").value;
-      const state = document.getElementById("stateSelect").value;
-      const category = manualCat === "AUTO" ? classifyFood(name) : manualCat;
+      const selectedCat = catSelect.value;
+      const category = selectedCat === "AUTO" ? classifyFood(name) : selectedCat;
+      const state = stateSelect.value;
 
-      if (!category) {
-        alert(`"${name}" is not in the built-in dictionary yet. Please select one of the 18 categories from the dropdown.`);
+      if (!category || !FACTORS[category]) {
+        catSelect.className = "unmapped-warn";
+        catSelect.focus();
+        alert(`"${name}" is not in the built-in dictionary yet. Please choose one of the 18 categories from the "Auto-Classified Category" dropdown.`);
         return;
       }
       if (isNaN(enteredGrams) || enteredGrams <= 0) return;
@@ -480,10 +467,11 @@
         rawGrams
       });
       saveAndRender();
-      document.getElementById("foodInput").value = "";
+      foodInput.value = "";
       document.getElementById("gramsInput").value = "";
-      document.getElementById("categorySelect").value = "AUTO";
-      updatePreview();
+      userManuallySelectedCategory = false;
+      catSelect.value = "AUTO";
+      syncCategoryFromInput();
     });
 
     function removeEntry(id) {
@@ -499,20 +487,23 @@
     function loadSampleMeal() {
       entries = [
         { id: 1, name: "Apple", category: "Fruits", state: "RAW", enteredGrams: 150, rawGrams: 150 },
-        { id: 2, name: "Turmeric", category: "Spices_Condiments", state: "RAW", enteredGrams: 5, rawGrams: 5 },
-        { id: 3, name: "Cooked Basmati Rice", category: "Rice", state: "COOKED", enteredGrams: 250, rawGrams: 250 / FACTORS.Rice.yield },
-        { id: 4, name: "Chapati / Roti", category: "Wheat", state: "COOKED", enteredGrams: 140, rawGrams: 140 / FACTORS.Wheat.yield },
-        { id: 5, name: "Cooked Toor Dal", category: "Pulses", state: "COOKED", enteredGrams: 168, rawGrams: 168 / FACTORS.Pulses.yield },
+        { id: 2, name: "Turmeric", category: "Spices & Condiments", state: "RAW", enteredGrams: 5, rawGrams: 5 },
+        { id: 3, name: "Cooked Basmati Rice", category: "Rice", state: "COOKED", enteredGrams: 250, rawGrams: 250 / FACTORS["Rice"].yield },
+        { id: 4, name: "Chapati / Roti", category: "Wheat", state: "COOKED", enteredGrams: 140, rawGrams: 140 / FACTORS["Wheat"].yield },
+        { id: 5, name: "Cooked Toor Dal", category: "Pulses", state: "COOKED", enteredGrams: 168, rawGrams: 168 / FACTORS["Pulses"].yield },
         { id: 6, name: "Milk", category: "Dairy", state: "RAW", enteredGrams: 250, rawGrams: 250 },
-        { id: 7, name: "Ghee", category: "Dairy_Fat", state: "RAW", enteredGrams: 10, rawGrams: 10 },
+        { id: 7, name: "Ghee", category: "Dairy Fat", state: "RAW", enteredGrams: 10, rawGrams: 10 },
         { id: 8, name: "Spinach (Palak)", category: "Vegetables", state: "RAW", enteredGrams: 80, rawGrams: 80 },
-        { id: 9, name: "Mustard Oil", category: "Oils_Plant", state: "RAW", enteredGrams: 20, rawGrams: 20 }
+        { id: 9, name: "Mustard Oil", category: "Plant Oils", state: "RAW", enteredGrams: 20, rawGrams: 20 },
+        { id: 10, name: "Almonds", category: "Nuts & Oilseeds", state: "RAW", enteredGrams: 15, rawGrams: 15 }
       ];
       saveAndRender();
     }
 
     function saveAndRender() {
-      localStorage.setItem("indian_diet_fp_entries_v2", JSON.stringify(entries));
+      try {
+        window.localStorage.setItem("indian_diet_fp_entries_v2", JSON.stringify(entries));
+      } catch (err) {}
       render();
     }
 
@@ -527,7 +518,7 @@
       Object.keys(FACTORS).forEach(c => catAgg[c] = { rawGrams: 0, ghg: 0, green: 0, blue: 0, land: 0 });
 
       entries.forEach(item => {
-        const f = FACTORS[item.category];
+        const f = FACTORS[item.category] || FACTORS["Processed & Other"];
         const rawG = item.rawGrams !== undefined ? item.rawGrams : item.grams;
         const entG = item.enteredGrams !== undefined ? item.enteredGrams : item.grams;
         const stateLbl = item.state || "RAW";
@@ -538,16 +529,18 @@
         const land = kg * f.land;
 
         totGhg += ghg; totGreen += green; totBlue += blue; totLand += land;
-        catAgg[item.category].rawGrams += rawG;
-        catAgg[item.category].ghg += ghg;
-        catAgg[item.category].green += green;
-        catAgg[item.category].blue += blue;
-        catAgg[item.category].land += land;
+        if (catAgg[item.category]) {
+          catAgg[item.category].rawGrams += rawG;
+          catAgg[item.category].ghg += ghg;
+          catAgg[item.category].green += green;
+          catAgg[item.category].blue += blue;
+          catAgg[item.category].land += land;
+        }
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><strong>${escapeHtml(item.name)}</strong></td>
-          <td><span class="badge">${item.category}</span></td>
+          <td><span class="badge">${escapeHtml(item.category)}</span></td>
           <td><span class="badge ${stateLbl === "COOKED" ? "cooked" : "raw"}">${stateLbl}</span></td>
           <td>${entG.toFixed(1)}</td>
           <td>${rawG.toFixed(1)}</td>
@@ -594,7 +587,7 @@
         const pctGhg = totGhg > 0 ? (d.ghg / totGhg) * 100 : 0;
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td><strong>${cat}</strong></td>
+          <td><strong>${escapeHtml(cat)}</strong></td>
           <td>${d.rawGrams.toFixed(1)}</td>
           <td>${d.ghg.toFixed(4)}</td>
           <td>${pctGhg.toFixed(1)}%</td>
@@ -609,16 +602,16 @@
     function exportCSV() {
       if (entries.length === 0) return alert("Add at least one food item before exporting.");
       const rows = [
-        ["Food Item", "Category", "Weight_State", "Entered_Grams", "Raw_Equivalent_Grams", "GHG_kg_CO2eq", "Green_WF_m3", "Blue_WF_m3", "Land_Use_m2"]
+        ["Food Item", "Category", "Weight State", "Entered Grams", "Raw Equivalent Grams", "GHG (kg CO2-eq)", "Green WF (m3)", "Blue WF (m3)", "Land Use (m2)"]
       ];
       entries.forEach(item => {
-        const f = FACTORS[item.category];
+        const f = FACTORS[item.category] || FACTORS["Processed & Other"];
         const rawG = item.rawGrams !== undefined ? item.rawGrams : item.grams;
         const entG = item.enteredGrams !== undefined ? item.enteredGrams : item.grams;
         const kg = rawG / 1000;
         rows.push([
           `"${item.name.replace(/"/g, '""')}"`,
-          item.category,
+          `"${item.category}"`,
           item.state || "RAW",
           entG.toFixed(2),
           rawG.toFixed(2),
