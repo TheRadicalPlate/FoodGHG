@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<!--
+  Indian Dietary Environmental Footprint Calculator
+  Copyright (c) 2026 Rachael Alphonso and Cheela Venkata Ravi Sankar
+  Licensed under the MIT License (see LICENSE file in repository root).
+  Data Attribution: Joshi & Raghuvanshi (2025); Green et al. (2018).
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indian Dietary Environmental Footprint Calculator</title>
+  <style>
+    :root {
+      --bg: #f4f7f5;
+      --card: #ffffff;
+      --primary: #1b4332;
+      --primary-light: #2d6a4f;
+      --accent: #d8f3dc;
+      --slate-bg: #f1f5f9;
+      --text: #1e293b;
+      --muted: #475569;
+      --border: #cbd5e1;
+      --warn: #b45309;
+      --danger: #b91c1c;
+    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.55; }
+    header { background: var(--primary); color: #fff; padding: 1.5rem 2rem; }
+    header h1 { margin: 0 0 0.35rem 0; font-size: 1.45rem; }
+    header p { margin: 0; color: #d8f3dc; font-size: 0.9rem; }
+    .container { max-width: 1220px; margin: 1.5rem auto; padding: 0 1rem; display: grid; gap: 1.25rem; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .card h2 { margin: 0 0 1rem 0; font-size: 1.05rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .form-grid { display: grid; grid-template-columns: 2fr 1.4fr 1.1fr 1.1fr auto; gap: 0.75rem; align-items: end; }
+    @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr; } }
+    label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 0.3rem; }
+    input, select { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.92rem; background: #fff; }
+    input:focus, select:focus { outline: 2px solid var(--primary-light); border-color: var(--primary-light); }
+    button { background: var(--primary); color: #fff; border: none; padding: 0.65rem 1.1rem; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.88rem; }
+    button:hover { background: var(--primary-light); }
+    button.secondary { background: #e2e8f0; color: var(--text); }
+    button.secondary:hover { background: #cbd5e1; }
+    button.danger { background: #fee2e2; color: var(--danger); padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 0.85rem; }
+    .kpi { background: var(--accent); border-radius: 8px; padding: 0.9rem 1rem; border-left: 4px solid var(--primary); }
+    .kpi .lbl { font-size: 0.78rem; font-weight: 700; color: var(--primary); text-transform: uppercase; }
+    .kpi .val { font-size: 1.45rem; font-weight: 800; color: #0f172a; margin: 0.2rem 0; }
+    .kpi .sub { font-size: 0.78rem; color: #334155; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th, td { padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--border); text-align: right; }
+    th:first-child, td:first-child, th:nth-child(2), td:nth-child(2), th:nth-child(3), td:nth-child(3) { text-align: left; }
+    th { background: var(--slate-bg); color: #334155; font-weight: 700; }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; background: #e0f2fe; color: #0369a1; }
+    .badge.cooked { background: #fef3c7; color: #92400e; }
+    .badge.raw { background: #dcfce7; color: #166534; }
+    .badge.mit { background: #1b4332; color: #ffffff; margin-left: 0.4rem; }
+    .bar-wrap { margin-bottom: 0.75rem; }
+    .bar-top { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .bar-bg { background: #e2e8f0; height: 10px; border-radius: 999px; overflow: hidden; }
+    .bar-fill { background: var(--primary-light); height: 100%; transition: width 0.25s ease; }
+    .bar-fill.over { background: #dc2626; }
+    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; }
+    .note { font-size: 0.8rem; color: var(--muted); margin-top: 0.6rem; }
+    .citation-box { background: var(--slate-bg); border-left: 4px solid var(--primary-light); padding: 0.85rem 1rem; border-radius: 6px; font-size: 0.86rem; color: #1e293b; margin-bottom: 0.75rem; }
+    .citation-box code { display: block; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.8rem; background: #fff; padding: 0.6rem; border: 1px solid var(--border); border-radius: 4px; margin-top: 0.5rem; }
+    footer { max-width: 1220px; margin: 0 auto 2rem auto; padding: 0 1rem; font-size: 0.8rem; color: var(--muted); text-align: center; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Indian Dietary Environmental Footprint Calculator</h1>
+    <p>Auto-classifies Indian foods into 18 categories and quantifies GHG emissions, Green &amp; Blue Water Footprints, and Land Use from raw or cooked gram intake.</p>
+  </header>
+
+  <div class="container">
+    <!-- 1. Input Section -->
+    <div class="card">
+      <h2>1. Add Food Intake (Grams)</h2>
+      <form id="foodForm" class="form-grid">
+        <div>
+          <label for="foodInput">Food Item (e.g., Apple, Turmeric, Basmati Rice, Paneer)</label>
+          <input id="foodInput" list="foodSuggestions" placeholder="Type any food item..." required autocomplete="off" />
+          <datalist id="foodSuggestions"></datalist>
+        </div>
+        <div>
+          <label for="categorySelect">Auto-Classified Category</label>
+          <select id="categorySelect">
+            <option value="AUTO">Auto-Detect from Food Name</option>
+          </select>
+        </div>
+        <div>
+          <label for="stateSelect">Weight State</label>
+          <select id="stateSelect">
+            <option value="RAW">Raw Weight (g)</option>
+            <option value="COOKED">Cooked / Ready-to-Eat (g)</option>
+          </select>
+        </div>
+        <div>
+          <label for="gramsInput">Quantity (grams)</label>
+          <input id="gramsInput" type="number" step="0.1" min="0.1" placeholder="e.g., 150" required />
+        </div>
+        <div>
+          <button type="submit">+ Add Food</button>
+        </div>
+      </form>
+      <div id="livePreview" class="note">Detected category: <strong>—</strong></div>
+    </div>
+
+    <!-- 2. KPI Summary -->
+    <div class="card">
+      <h2>2. Cumulative Dietary Environmental Footprint</h2>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="lbl">GHG Emissions</div>
+          <div class="val" id="kpiGhg">0.000 kg</div>
+          <div class="sub">CO₂-eq (NIN Plate: 2.30 kg/d)</div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">Green Water Footprint</div>
+          <div class="val" id="kpiGreen">0.000 m³</div>
+          <div class="sub">Rainwater (NIN Plate: 2.35 m³/d)</div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">Blue Water Footprint</div>
+          <div class="val" id="kpiBlue">0.000 m³</div>
+          <div class="sub">Irrigation (NIN Plate: 0.44 m³/d)</div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">Total Water (Liters)</div>
+          <div class="val" id="kpiLiters">0 L</div>
+          <div class="sub">Green + Blue combined</div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">Land Use Footprint</div>
+          <div class="val" id="kpiLand">0.00 m²</div>
+          <div class="sub">NIN Plate: 4.96 m²/d</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Benchmark Comparison -->
+    <div class="card">
+      <h2>3. Benchmark vs. ICMR-NIN 'My Plate for the Day' (Vegetarian Reference)</h2>
+      <div id="benchmarkBars"></div>
+      <p class="note">Reference values from Joshi &amp; Raghuvanshi (2025), Table 5: 2.30 kg CO₂-eq/d, 2.35 m³/d Green WF, 0.44 m³/d Blue WF, 4.96 m²/d Land Use (1,200 g total intake).</p>
+    </div>
+
+    <!-- 4. Logged Items Table -->
+    <div class="card">
+      <h2>4. Logged Food Items</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Food Item</th>
+              <th>Category</th>
+              <th>State</th>
+              <th>Entered (g)</th>
+              <th>Raw Equiv. (g)</th>
+              <th>GHG (kg CO₂-eq)</th>
+              <th>Green WF (m³)</th>
+              <th>Blue WF (m³)</th>
+              <th>Land Use (m²)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <button type="button" class="secondary" onclick="loadSampleMeal()">Load Sample Meal</button>
+        <button type="button" class="secondary" onclick="exportCSV()">Export CSV</button>
+        <button type="button" class="secondary" onclick="clearAll()">Clear All</button>
+      </div>
+      <p class="note"><strong>Cooking Yield Note:</strong> Footprint coefficients apply to raw weights. When <em>Cooked</em> is selected, entered grams are divided by standard Bognár (2002) / EuroFIR (2008) yield factors (Rice/Millets ÷ 2.50, Pulses ÷ 2.80, Wheat roti/chapati ÷ 1.40, Vegetables ÷ 0.85, Poultry/Red Meat ÷ 0.75, Fish ÷ 0.80, Eggs ÷ 0.90) to recover raw weight.</p>
+    </div>
+
+    <!-- 5. Category Summary -->
+    <div class="card">
+      <h2>5. Breakdown by Food Category</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Raw Equiv. (g)</th>
+              <th>GHG (kg CO₂-eq)</th>
+              <th>% GHG</th>
+              <th>Green WF (m³)</th>
+              <th>Blue WF (m³)</th>
+              <th>Land Use (m²)</th>
+            </tr>
+          </thead>
+          <tbody id="catBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 6. Citations, License & Data Attribution -->
+    <div class="card">
+      <h2>6. Citations, Software License &amp; Data Attribution <span class="badge mit">MIT License</span></h2>
+
+      <div class="citation-box">
+        <strong>How to Cite This Application (For Users of This Tool):</strong>
+        <div id="userCitationText" style="margin-top:0.35rem;"></div>
+        <div class="actions">
+          <button type="button" class="secondary" onclick="copyCitation('apa')">Copy APA Citation</button>
+          <button type="button" class="secondary" onclick="copyCitation('bibtex')">Copy BibTeX</button>
+          <span id="copyStatus" class="note" style="margin:0;align-self:center;"></span>
+        </div>
+        <code id="bibtexBlock"></code>
+      </div>
+
+      <div class="citation-box">
+        <strong>Software License (MIT License):</strong>
+        <p style="margin:0.35rem 0 0 0;">
+          Copyright &copy; 2026 <strong>Rachael Alphonso</strong> and <strong>Cheela Venkata Ravi Sankar</strong>. This software source code is released under the <strong>MIT License</strong>—permitting free use, copying, modification, merging, publishing, and distribution, provided the copyright and permission notice are retained in all copies. Underlying empirical datasets remain governed by their original scholarly attributions listed below.
+        </p>
+      </div>
+
+      <div class="citation-box" style="margin-bottom:0;">
+        <strong>Primary Scientific Data &amp; Methodology References:</strong>
+        <ul style="margin:0.4rem 0 0 1.2rem;padding:0;">
+          <li><strong>Joshi, N., &amp; Raghuvanshi, R. S. (2025).</strong> Exploring environmental footprints and socio-demographic characteristics of Indian diets. <em>Science of the Total Environment</em>, 967, 178781. <a href="https://doi.org/10.1016/j.scitotenv.2025.178781" target="_blank" rel="noopener">https://doi.org/10.1016/j.scitotenv.2025.178781</a></li>
+          <li><strong>Green, R. F., Joy, E. J. M., Harris, F., et al. (2018).</strong> Greenhouse gas emissions and water footprints of typical dietary patterns in India. <em>Science of the Total Environment</em>, 643, 1411–1418. <a href="https://doi.org/10.1016/j.scitotenv.2018.06.258" target="_blank" rel="noopener">https://doi.org/10.1016/j.scitotenv.2018.06.258</a></li>
+          <li><strong>Water &amp; Cooking Yield Foundations:</strong> Mekonnen, M. M., &amp; Hoekstra, A. Y. (2010, 2012) (Water Footprint Network); Bognár, A. (2002) &amp; EuroFIR (2008) (weight yield factors for cooked foods).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 Rachael Alphonso &amp; Cheela Venkata Ravi Sankar • Released under the MIT License • Data derived from Joshi &amp; Raghuvanshi (2025) and Green et al. (2018).
+  </footer>
+
+  <script>
+    // Exact 18-category intensity matrix per kg of raw food (GHG Calc app DATABASE.xlsx)
+    const FACTORS = {
+      Dairy:             { ghg: 4.69,  green: 2.46,  blue: 0.36, land: 3.37,  yield: 1.00 },
+      Dairy_Fat:         { ghg: 12.53, green: 4.82,  blue: 0.71, land: 10.27, yield: 1.00 },
+      Eggs:              { ghg: 1.12,  green: 5.43,  blue: 0.71, land: 16.99, yield: 0.90 },
+      Fish:              { ghg: 1.17,  green: 0.67,  blue: 0.29, land: 0.00,  yield: 0.80 },
+      Fruits:            { ghg: 0.27,  green: 0.73,  blue: 0.27, land: 0.78,  yield: 1.00 },
+      Millets:           { ghg: 0.77,  green: 4.21,  blue: 0.08, land: 9.40,  yield: 2.50 },
+      Nuts_Oilseeds:     { ghg: 1.29,  green: 7.71,  blue: 1.49, land: 14.73, yield: 1.00 },
+      Oils_Plant:        { ghg: 1.04,  green: 10.31, blue: 1.19, land: 35.87, yield: 1.00 },
+      Other_Cereals:     { ghg: 0.77,  green: 2.27,  blue: 0.10, land: 4.18,  yield: 2.40 },
+      Poultry:           { ghg: 1.43,  green: 6.73,  blue: 0.87, land: 30.63, yield: 0.75 },
+      Processed_Other:   { ghg: 3.14,  green: 3.17,  blue: 0.46, land: 12.80, yield: 1.00 },
+      Pulses:            { ghg: 1.44,  green: 5.01,  blue: 0.22, land: 14.62, yield: 2.80 },
+      Red_Meat:          { ghg: 85.57, green: 5.80,  blue: 0.49, land: 52.91, yield: 0.75 },
+      Rice:              { ghg: 1.61,  green: 2.05,  blue: 0.66, land: 3.82,  yield: 2.50 },
+      Spices_Condiments: { ghg: 1.25,  green: 12.01, blue: 2.61, land: 5.59,  yield: 1.00 },
+      Sugars:            { ghg: 0.50,  green: 0.55,  blue: 0.62, land: 1.18,  yield: 1.00 },
+      Vegetables:        { ghg: 0.36,  green: 0.34,  blue: 0.09, land: 0.81,  yield: 0.85 },
+      Wheat:             { ghg: 0.54,  green: 0.63,  blue: 1.16, land: 2.63,  yield: 1.40 }
+    };
+
+    // Keyword dictionary mapping Indian & global foods to the 18 categories
+    const FOOD_DICTIONARY = {
+      // Dairy
+      "milk": "Dairy", "cow milk": "Dairy", "buffalo milk": "Dairy", "toned milk": "Dairy",
+      "curd": "Dairy", "dahi": "Dairy", "yogurt": "Dairy", "yoghurt": "Dairy",
+      "paneer": "Dairy", "cottage cheese": "Dairy", "buttermilk": "Dairy", "chaas": "Dairy",
+      "lassi": "Dairy", "cheese": "Dairy", "khoya": "Dairy", "mawa": "Dairy",
+      // Dairy_Fat
+      "ghee": "Dairy_Fat", "desi ghee": "Dairy_Fat", "butter": "Dairy_Fat",
+      "white butter": "Dairy_Fat", "makhan": "Dairy_Fat", "cream": "Dairy_Fat", "malai": "Dairy_Fat",
+      // Eggs
+      "egg": "Eggs", "eggs": "Eggs", "boiled egg": "Eggs", "omelette": "Eggs", "egg white": "Eggs",
+      // Fish
+      "fish": "Fish", "rohu": "Fish", "katla": "Fish", "hilsa": "Fish", "pomfret": "Fish",
+      "mackerel": "Fish", "surmai": "Fish", "sardine": "Fish", "tuna": "Fish", "salmon": "Fish",
+      "prawns": "Fish", "shrimp": "Fish", "crab": "Fish", "seafood": "Fish",
+      // Fruits
+      "apple": "Fruits", "banana": "Fruits", "mango": "Fruits", "orange": "Fruits",
+      "papaya": "Fruits", "guava": "Fruits", "grapes": "Fruits", "watermelon": "Fruits",
+      "muskmelon": "Fruits", "melon": "Fruits", "pomegranate": "Fruits", "anar": "Fruits",
+      "pineapple": "Fruits", "chikoo": "Fruits", "sapota": "Fruits", "pear": "Fruits",
+      "plum": "Fruits", "peach": "Fruits", "lychee": "Fruits", "litchi": "Fruits",
+      "custard apple": "Fruits", "sitaphal": "Fruits", "jackfruit": "Fruits", "fig": "Fruits",
+      "anjeer": "Fruits", "dates": "Fruits", "khajoor": "Fruits", "kiwi": "Fruits",
+      "strawberry": "Fruits", "lemon": "Fruits", "lime": "Fruits", "mosambi": "Fruits", "avocado": "Fruits",
+      // Millets
+      "millet": "Millets", "millets": "Millets", "ragi": "Millets", "finger millet": "Millets",
+      "nachni": "Millets", "bajra": "Millets", "pearl millet": "Millets", "jowar": "Millets",
+      "sorghum": "Millets", "foxtail millet": "Millets", "kangni": "Millets",
+      "little millet": "Millets", "kutki": "Millets", "kodo millet": "Millets",
+      "barnyard millet": "Millets", "sanwa": "Millets", "amaranth": "Millets", "rajgira": "Millets",
+      // Nuts_Oilseeds
+      "almond": "Nuts_Oilseeds", "almonds": "Nuts_Oilseeds", "badam": "Nuts_Oilseeds",
+      "cashew": "Nuts_Oilseeds", "cashews": "Nuts_Oilseeds", "kaju": "Nuts_Oilseeds",
+      "peanut": "Nuts_Oilseeds", "peanuts": "Nuts_Oilseeds", "groundnut": "Nuts_Oilseeds",
+      "walnut": "Nuts_Oilseeds", "akhrot": "Nuts_Oilseeds", "pistachio": "Nuts_Oilseeds",
+      "pista": "Nuts_Oilseeds", "raisins": "Nuts_Oilseeds", "kishmish": "Nuts_Oilseeds",
+      "sesame": "Nuts_Oilseeds", "til": "Nuts_Oilseeds", "flaxseed": "Nuts_Oilseeds",
+      "chia seeds": "Nuts_Oilseeds", "pumpkin seeds": "Nuts_Oilseeds", "sunflower seeds": "Nuts_Oilseeds",
+      "coconut": "Nuts_Oilseeds", "fresh coconut": "Nuts_Oilseeds",
+      // Oils_Plant
+      "vegetable oil": "Oils_Plant", "cooking oil": "Oils_Plant", "oil": "Oils_Plant",
+      "mustard oil": "Oils_Plant", "sunflower oil": "Oils_Plant", "soybean oil": "Oils_Plant",
+      "groundnut oil": "Oils_Plant", "peanut oil": "Oils_Plant", "coconut oil": "Oils_Plant",
+      "sesame oil": "Oils_Plant", "gingelly oil": "Oils_Plant", "rice bran oil": "Oils_Plant",
+      "olive oil": "Oils_Plant", "palm oil": "Oils_Plant", "canola oil": "Oils_Plant",
+      // Other_Cereals
+      "oats": "Other_Cereals", "oatmeal": "Other_Cereals", "maize": "Other_Cereals",
+      "corn": "Other_Cereals", "sweet corn": "Other_Cereals", "makki": "Other_Cereals",
+      "barley": "Other_Cereals", "jau": "Other_Cereals", "quinoa": "Other_Cereals",
+      // Poultry
+      "chicken": "Poultry", "chicken breast": "Poultry", "chicken curry": "Poultry",
+      "poultry": "Poultry", "duck": "Poultry", "turkey": "Poultry",
+      // Processed_Other
+      "biscuit": "Processed_Other", "biscuits": "Processed_Other", "bread": "Processed_Other",
+      "cake": "Processed_Other", "rusk": "Processed_Other", "namkeen": "Processed_Other",
+      "chips": "Processed_Other", "samosa": "Processed_Other", "pakora": "Processed_Other",
+      "noodles": "Processed_Other", "pasta": "Processed_Other", "chocolate": "Processed_Other",
+      "ice cream": "Processed_Other", "sweets": "Processed_Other", "mithai": "Processed_Other",
+      "jam": "Processed_Other", "ketchup": "Processed_Other", "pickle": "Processed_Other",
+      "papad": "Processed_Other", "soft drink": "Processed_Other", "tea": "Processed_Other",
+      "coffee": "Processed_Other", "tofu": "Processed_Other", "soya chunks": "Processed_Other",
+      // Pulses
+      "dal": "Pulses", "lentils": "Pulses", "toor dal": "Pulses", "arhar dal": "Pulses",
+      "red gram": "Pulses", "moong dal": "Pulses", "green gram": "Pulses", "moong": "Pulses",
+      "masoor dal": "Pulses", "urad dal": "Pulses", "black gram": "Pulses", "chana dal": "Pulses",
+      "chickpea": "Pulses", "chickpeas": "Pulses", "kabuli chana": "Pulses", "kala chana": "Pulses",
+      "rajma": "Pulses", "kidney beans": "Pulses", "lobia": "Pulses", "cowpea": "Pulses",
+      "horse gram": "Pulses", "kulthi": "Pulses", "soybean": "Pulses", "besan": "Pulses",
+      // Red_Meat
+      "mutton": "Red_Meat", "goat": "Red_Meat", "goat meat": "Red_Meat", "lamb": "Red_Meat",
+      "beef": "Red_Meat", "buffalo meat": "Red_Meat", "pork": "Red_Meat", "keema": "Red_Meat",
+      // Rice
+      "rice": "Rice", "white rice": "Rice", "brown rice": "Rice", "basmati rice": "Rice",
+      "parboiled rice": "Rice", "idli rice": "Rice", "poha": "Rice", "murmura": "Rice", "rice flour": "Rice",
+      // Spices_Condiments
+      "turmeric": "Spices_Condiments", "turmeric powder": "Spices_Condiments", "haldi": "Spices_Condiments",
+      "cumin": "Spices_Condiments", "jeera": "Spices_Condiments", "coriander powder": "Spices_Condiments",
+      "coriander seeds": "Spices_Condiments", "dhania": "Spices_Condiments",
+      "chili powder": "Spices_Condiments", "red chilli": "Spices_Condiments",
+      "black pepper": "Spices_Condiments", "pepper": "Spices_Condiments",
+      "cardamom": "Spices_Condiments", "elaichi": "Spices_Condiments",
+      "cinnamon": "Spices_Condiments", "dalchini": "Spices_Condiments",
+      "clove": "Spices_Condiments", "cloves": "Spices_Condiments",
+      "mustard seeds": "Spices_Condiments", "fenugreek": "Spices_Condiments",
+      "asafoetida": "Spices_Condiments", "hing": "Spices_Condiments",
+      "garam masala": "Spices_Condiments", "ginger": "Spices_Condiments",
+      "garlic": "Spices_Condiments", "tamarind": "Spices_Condiments", "vinegar": "Spices_Condiments",
+      // Sugars
+      "sugar": "Sugars", "white sugar": "Sugars", "brown sugar": "Sugars",
+      "jaggery": "Sugars", "gur": "Sugars", "honey": "Sugars", "mishri": "Sugars",
+      // Vegetables
+      "potato": "Vegetables", "aloo": "Vegetables", "sweet potato": "Vegetables",
+      "onion": "Vegetables", "pyaz": "Vegetables", "tomato": "Vegetables",
+      "spinach": "Vegetables", "palak": "Vegetables", "methi": "Vegetables",
+      "cabbage": "Vegetables", "cauliflower": "Vegetables", "broccoli": "Vegetables",
+      "brinjal": "Vegetables", "eggplant": "Vegetables", "baingan": "Vegetables",
+      "okra": "Vegetables", "ladyfinger": "Vegetables", "bhindi": "Vegetables",
+      "bottle gourd": "Vegetables", "lauki": "Vegetables", "bitter gourd": "Vegetables", "karela": "Vegetables",
+      "ridge gourd": "Vegetables", "pumpkin": "Vegetables", "cucumber": "Vegetables",
+      "carrot": "Vegetables", "gajar": "Vegetables", "radish": "Vegetables",
+      "beetroot": "Vegetables", "capsicum": "Vegetables", "bell pepper": "Vegetables",
+      "green beans": "Vegetables", "french beans": "Vegetables", "drumstick": "Vegetables",
+      "mushroom": "Vegetables", "green peas": "Vegetables", "taro": "Vegetables", "arbi": "Vegetables",
+      // Wheat
+      "wheat": "Wheat", "wheat flour": "Wheat", "atta": "Wheat", "whole wheat": "Wheat",
+      "roti": "Wheat", "chapati": "Wheat", "phulka": "Wheat", "paratha": "Wheat",
+      "puri": "Wheat", "naan": "Wheat", "maida": "Wheat", "semolina": "Wheat",
+      "suji": "Wheat", "rava": "Wheat", "dalia": "Wheat", "vermicelli": "Wheat"
+    };
+
+    const NIN_BENCHMARK = { ghg: 2.30, green: 2.35, blue: 0.44, land: 4.96 };
+    let entries = JSON.parse(localStorage.getItem("indian_diet_fp_entries_v2") || "[]");
+
+    // Dynamic citation setup for Alphonso & Cheela (MIT Licensed)
+    const appUrl = window.location.protocol.startsWith("http")
+      ? window.location.href.split("#")[0].split("?")[0]
+      : "https://github.com/[username]/[repository]";
+
+    const APA_CITATION = `Alphonso, R., & Cheela, V. R. S. (2026). Indian Dietary Environmental Footprint Calculator (MIT License) [Web application]. Based on environmental intensity datasets by Joshi & Raghuvanshi (2025) and Green et al. (2018). ${appUrl}`;
+    const BIBTEX_CITATION = `@software{alphonso_cheela_2026_diet_footprint,
+  author       = {Alphonso, Rachael and Cheela, Venkata Ravi Sankar},
+  title        = {Indian Dietary Environmental Footprint Calculator},
+  year         = {2026},
+  license      = {MIT},
+  url          = {${appUrl}},
+  note         = {Implements dietary environmental intensity coefficients from Joshi \\& Raghuvanshi (2025) and Green et al. (2018)}
+}`;
+
+    document.getElementById("userCitationText").textContent = APA_CITATION;
+    document.getElementById("bibtexBlock").textContent = BIBTEX_CITATION;
+
+    function copyCitation(type) {
+      const text = type === "bibtex" ? BIBTEX_CITATION : APA_CITATION;
+      navigator.clipboard.writeText(text).then(() => {
+        const status = document.getElementById("copyStatus");
+        status.textContent = type === "bibtex" ? "BibTeX copied to clipboard." : "APA citation copied to clipboard.";
+        setTimeout(() => { status.textContent = ""; }, 3000);
+      });
+    }
+
+    // Populate dropdowns and autocomplete
+    const catSelect = document.getElementById("categorySelect");
+    Object.keys(FACTORS).forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      catSelect.appendChild(opt);
+    });
+
+    const datalist = document.getElementById("foodSuggestions");
+    Object.keys(FOOD_DICTIONARY).sort().forEach(food => {
+      const opt = document.createElement("option");
+      opt.value = food.replace(/\b\w/g, l => l.toUpperCase());
+      datalist.appendChild(opt);
+    });
+
+    function classifyFood(rawName) {
+      const clean = rawName.trim().toLowerCase();
+      if (!clean) return null;
+      if (FOOD_DICTIONARY[clean]) return FOOD_DICTIONARY[clean];
+      const sortedKeys = Object.keys(FOOD_DICTIONARY).sort((a, b) => b.length - a.length);
+      for (const key of sortedKeys) {
+        const regex = new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+        if (regex.test(clean)) return FOOD_DICTIONARY[key];
+      }
+      return null;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+    }
+
+    function updatePreview() {
+      const nameVal = document.getElementById("foodInput").value;
+      const manualCat = document.getElementById("categorySelect").value;
+      const state = document.getElementById("stateSelect").value;
+      const detected = manualCat === "AUTO" ? classifyFood(nameVal) : manualCat;
+      const preview = document.getElementById("livePreview");
+
+      if (!nameVal.trim() && manualCat === "AUTO") {
+        preview.innerHTML = "Detected category: <strong>—</strong>";
+      } else if (detected) {
+        const yf = FACTORS[detected].yield;
+        const yieldInfo = state === "COOKED"
+          ? ` • Cooked-to-raw yield factor: <strong>÷ ${yf.toFixed(2)}</strong>`
+          : " • Direct raw weight";
+        preview.innerHTML = `Detected category: <strong>${detected}</strong>${yieldInfo}`;
+      } else {
+        preview.innerHTML = `Detected category: <strong style="color:#b45309;">Unmapped — please select a category manually</strong>`;
+      }
+    }
+
+    document.getElementById("foodInput").addEventListener("input", updatePreview);
+    document.getElementById("categorySelect").addEventListener("change", updatePreview);
+    document.getElementById("stateSelect").addEventListener("change", updatePreview);
+
+    document.getElementById("foodForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const name = document.getElementById("foodInput").value.trim();
+      const enteredGrams = parseFloat(document.getElementById("gramsInput").value);
+      const manualCat = document.getElementById("categorySelect").value;
+      const state = document.getElementById("stateSelect").value;
+      const category = manualCat === "AUTO" ? classifyFood(name) : manualCat;
+
+      if (!category) {
+        alert(`"${name}" is not in the built-in dictionary yet. Please select one of the 18 categories from the dropdown.`);
+        return;
+      }
+      if (isNaN(enteredGrams) || enteredGrams <= 0) return;
+
+      const yieldFactor = state === "COOKED" ? FACTORS[category].yield : 1.0;
+      const rawGrams = enteredGrams / yieldFactor;
+
+      entries.push({
+        id: Date.now() + Math.random(),
+        name,
+        category,
+        state,
+        enteredGrams,
+        rawGrams
+      });
+      saveAndRender();
+      document.getElementById("foodInput").value = "";
+      document.getElementById("gramsInput").value = "";
+      document.getElementById("categorySelect").value = "AUTO";
+      updatePreview();
+    });
+
+    function removeEntry(id) {
+      entries = entries.filter(item => item.id !== id);
+      saveAndRender();
+    }
+
+    function clearAll() {
+      entries = [];
+      saveAndRender();
+    }
+
+    function loadSampleMeal() {
+      entries = [
+        { id: 1, name: "Apple", category: "Fruits", state: "RAW", enteredGrams: 150, rawGrams: 150 },
+        { id: 2, name: "Turmeric", category: "Spices_Condiments", state: "RAW", enteredGrams: 5, rawGrams: 5 },
+        { id: 3, name: "Cooked Basmati Rice", category: "Rice", state: "COOKED", enteredGrams: 250, rawGrams: 250 / FACTORS.Rice.yield },
+        { id: 4, name: "Chapati / Roti", category: "Wheat", state: "COOKED", enteredGrams: 140, rawGrams: 140 / FACTORS.Wheat.yield },
+        { id: 5, name: "Cooked Toor Dal", category: "Pulses", state: "COOKED", enteredGrams: 168, rawGrams: 168 / FACTORS.Pulses.yield },
+        { id: 6, name: "Milk", category: "Dairy", state: "RAW", enteredGrams: 250, rawGrams: 250 },
+        { id: 7, name: "Ghee", category: "Dairy_Fat", state: "RAW", enteredGrams: 10, rawGrams: 10 },
+        { id: 8, name: "Spinach (Palak)", category: "Vegetables", state: "RAW", enteredGrams: 80, rawGrams: 80 },
+        { id: 9, name: "Mustard Oil", category: "Oils_Plant", state: "RAW", enteredGrams: 20, rawGrams: 20 }
+      ];
+      saveAndRender();
+    }
+
+    function saveAndRender() {
+      localStorage.setItem("indian_diet_fp_entries_v2", JSON.stringify(entries));
+      render();
+    }
+
+    function render() {
+      const logBody = document.getElementById("logBody");
+      const catBody = document.getElementById("catBody");
+      logBody.innerHTML = "";
+      catBody.innerHTML = "";
+
+      let totGhg = 0, totGreen = 0, totBlue = 0, totLand = 0;
+      const catAgg = {};
+      Object.keys(FACTORS).forEach(c => catAgg[c] = { rawGrams: 0, ghg: 0, green: 0, blue: 0, land: 0 });
+
+      entries.forEach(item => {
+        const f = FACTORS[item.category];
+        const rawG = item.rawGrams !== undefined ? item.rawGrams : item.grams;
+        const entG = item.enteredGrams !== undefined ? item.enteredGrams : item.grams;
+        const stateLbl = item.state || "RAW";
+        const kg = rawG / 1000;
+        const ghg = kg * f.ghg;
+        const green = kg * f.green;
+        const blue = kg * f.blue;
+        const land = kg * f.land;
+
+        totGhg += ghg; totGreen += green; totBlue += blue; totLand += land;
+        catAgg[item.category].rawGrams += rawG;
+        catAgg[item.category].ghg += ghg;
+        catAgg[item.category].green += green;
+        catAgg[item.category].blue += blue;
+        catAgg[item.category].land += land;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(item.name)}</strong></td>
+          <td><span class="badge">${item.category}</span></td>
+          <td><span class="badge ${stateLbl === "COOKED" ? "cooked" : "raw"}">${stateLbl}</span></td>
+          <td>${entG.toFixed(1)}</td>
+          <td>${rawG.toFixed(1)}</td>
+          <td>${ghg.toFixed(4)}</td>
+          <td>${green.toFixed(4)}</td>
+          <td>${blue.toFixed(4)}</td>
+          <td>${land.toFixed(4)}</td>
+          <td><button class="danger" onclick="removeEntry(${item.id})">Delete</button></td>
+        `;
+        logBody.appendChild(tr);
+      });
+
+      if (entries.length === 0) {
+        logBody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#64748b;padding:1.25rem;">No foods logged yet. Add an item above or click "Load Sample Meal".</td></tr>`;
+      }
+
+      document.getElementById("kpiGhg").textContent = `${totGhg.toFixed(3)} kg`;
+      document.getElementById("kpiGreen").textContent = `${totGreen.toFixed(3)} m³`;
+      document.getElementById("kpiBlue").textContent = `${totBlue.toFixed(3)} m³`;
+      document.getElementById("kpiLiters").textContent = `${Math.round((totGreen + totBlue) * 1000).toLocaleString()} L`;
+      document.getElementById("kpiLand").textContent = `${totLand.toFixed(2)} m²`;
+
+      const metrics = [
+        { label: "GHG Emissions (kg CO₂-eq/day)", val: totGhg, ref: NIN_BENCHMARK.ghg, unit: "kg" },
+        { label: "Green Water Footprint (m³/day)", val: totGreen, ref: NIN_BENCHMARK.green, unit: "m³" },
+        { label: "Blue Water Footprint (m³/day)", val: totBlue, ref: NIN_BENCHMARK.blue, unit: "m³" },
+        { label: "Land Use Footprint (m²/day)", val: totLand, ref: NIN_BENCHMARK.land, unit: "m²" }
+      ];
+      document.getElementById("benchmarkBars").innerHTML = metrics.map(m => {
+        const pct = (m.val / m.ref) * 100;
+        const barW = Math.min(pct, 100);
+        return `
+          <div class="bar-wrap">
+            <div class="bar-top">
+              <span>${m.label}</span>
+              <span>${m.val.toFixed(2)} / ${m.ref.toFixed(2)} ${m.unit} (${pct.toFixed(0)}%)</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill ${pct > 100 ? "over" : ""}" style="width:${barW}%"></div></div>
+          </div>
+        `;
+      }).join("");
+
+      Object.entries(catAgg).forEach(([cat, d]) => {
+        const pctGhg = totGhg > 0 ? (d.ghg / totGhg) * 100 : 0;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${cat}</strong></td>
+          <td>${d.rawGrams.toFixed(1)}</td>
+          <td>${d.ghg.toFixed(4)}</td>
+          <td>${pctGhg.toFixed(1)}%</td>
+          <td>${d.green.toFixed(4)}</td>
+          <td>${d.blue.toFixed(4)}</td>
+          <td>${d.land.toFixed(4)}</td>
+        `;
+        catBody.appendChild(tr);
+      });
+    }
+
+    function exportCSV() {
+      if (entries.length === 0) return alert("Add at least one food item before exporting.");
+      const rows = [
+        ["Food Item", "Category", "Weight_State", "Entered_Grams", "Raw_Equivalent_Grams", "GHG_kg_CO2eq", "Green_WF_m3", "Blue_WF_m3", "Land_Use_m2"]
+      ];
+      entries.forEach(item => {
+        const f = FACTORS[item.category];
+        const rawG = item.rawGrams !== undefined ? item.rawGrams : item.grams;
+        const entG = item.enteredGrams !== undefined ? item.enteredGrams : item.grams;
+        const kg = rawG / 1000;
+        rows.push([
+          `"${item.name.replace(/"/g, '""')}"`,
+          item.category,
+          item.state || "RAW",
+          entG.toFixed(2),
+          rawG.toFixed(2),
+          (kg * f.ghg).toFixed(6),
+          (kg * f.green).toFixed(6),
+          (kg * f.blue).toFixed(6),
+          (kg * f.land).toFixed(6)
+        ]);
+      });
+      rows.push([]);
+      rows.push([`"Tool Citation: ${APA_CITATION.replace(/"/g, '""')}"`]);
+      rows.push([`"Software License: MIT License (Copyright 2026 Rachael Alphonso & Cheela Venkata Ravi Sankar)."`]);
+      rows.push([`"Data Source: Joshi, N., & Raghuvanshi, R. S. (2025). Science of the Total Environment, 967, 178781; Green et al. (2018)."`]);
+
+      const blob = new Blob([rows.map(r => r.join(",")).join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "indian_diet_environmental_footprint.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    render();
+  </script>
+</body>
+</html>
